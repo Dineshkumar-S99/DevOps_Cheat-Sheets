@@ -71,14 +71,171 @@ Commands
 1. git restore <filename> → to discard the changes in the working directory. i.e: even before staging (note: this will be only for previously commited files)
     1. and it will also work in case where if we have a file that we staged and again we modified it, now it shows modified twice, one to be commited and other to be staged, here we can use git restore
 2. git log - - name-only → to list the changed files as well
-3. git reset --soft HEAD~1 → to revert the last change we made or commited
+3. git reset --soft HEAD~1 → to revert the last change we made or comitted
 4. `git log --graph --decorate` → to see previous commit history along with the branch they were committed on
-5. .
-6. .
+5. git merge origin/master → to merge the fetched changes from origin to our branch (can direcly pull to do  fetch and this merge)
+6. 
 7. .
 8. .
 9. .
 
-The URL that we used to connect the local and remote repository are called Connection string
+The URL that we used to connect the local and remote repository are called Connection string.
 
-origin is nothing but an aliasing name we give to an remote repository
+origin is nothing but an aliasing name we give to an remote repository.
+
+fetching will update the local branch to the origin master and point to the latest changes made on origin master. and to point we have to merge the origin master into the local master (can directly pull instead these - cmd: git pull origin master).
+
+Git Pull - is two commands in one include both fetch and merge.
+
+Fork - fork is just like cloning but cloning/ creating our own copy of the repository/project to our remote repository (i.e:GitHub, GitLab etc.). and then send a pull request to update your changes to the repo where we forked.
+
+when we want to have our own branch to have all latest changes from the main branch we can do it in two ways
+
+1. merge the main with our branch (will create new merge commits to merge the changes)
+2. rebasing the branches (like putting one on top of another one.) so instead merging we moving one on top of another.
+    1. git rebase master - this will put our branch on top of master branch. now our branch will also have all the changes made in the master branch.
+
+note: when we are merging it won’t create a new commit hash, but in rebasing it will create a new hash, which means it’s like modifying the history but most cases its not a problem just creates extra logs.
+
+since there is no merge commits, we don’t have any clarity on what’s happening.
+
+Interactive Rebasing;
+
+rebase command also let us to modify the history before rebasing. lets take scenario where we want to have multiple commits as single commit we can do so by using rebase.
+
+eg: we want to convert last 4 commits into one we can do it by 
+
+git rebase -i HEAD~4   → this says git we want to interactively rebase last 4 commits. now it will open a prompt and show us all the options that can be used.
+
+now all four commits will be shown and will have key works pick. eg:
+
+pick cmthash cmtmsg
+
+pick cmthash cmtmsg
+
+pick cmthash cmtmsg
+
+pick cmthash cmtmsg
+
+now pick which commit we want and squash rest (squash is like reduce) 
+
+pick cmthash cmtmsg
+
+squash cmthash cmtmsg
+
+squash cmthash cmtmsg
+
+squash cmthash cmtmsg
+
+it will pick the last commit and squash rest and will become single commit with the pick commitid
+
+ When we want to copy only certain commit to the main branch not everything In the current branch we can use command cherry-pick 
+
+ git cherry-pick cmtId → now only that particularly commit will get copied to the main branch.
+
+Git revert cmtId → this will help us to revert back to the commitid we specified but this will also create a new commit Id hash
+
+We can also reset or revert back without creating a new commit id, using reset commands and have two types 
+
+1. git reset - - soft HEAD~1 → this will keep the changes we made in the last commit and revert back
+2. git reset - - hard HEAD~1 → This will delete all the changes we made in the last commit and revert back, so we don’t have anything to commit after the reset 
+
+lets take scenario where we want to fix bugs in different program while we are working on a different program and we want a clean workspace for the bug fixing what can be done,
+
+we can use stashing (git stash)
+
+git stash → everything in the working/staging area will be sent to the stash
+
+git stash pop → will now bring back all the files from stash to working area.
+
+git stash list → to view all the contents in the stash
+
+git stash show stash@{n} → n can be the number of stash, like 1st stash, 2nd stash, we can able to view them.
+
+eg: git stash show stash@{3} → will show the 3rd stash
+
+git stash pop → will remove the stash that’s lastly added.
+
+eg: stash0 - story3, stash1 - story2, stash2 - story1 now git pop will take out story1
+
+git stash pop stash@{n} → to pop the particular stash we want.
+
+note: we can stash multiple files and it will get pilled up on upon other like stack FILO.
+
+git reflog → shows all the actions that we executed on a repo like commits, merges, resets, reverts, etc. similar like git log but also shows the commits and commands
+
+lets takes a scenario where we did hard reset but later found the commit is most important, and now to revert back we use reflog.
+
+git reflog → shows all the alterations made. and by seeing the commit we can revert back based on the information 
+
+eg: to get back to previous state 
+
+git reset —hard hashfromreflog
+
+note: even this action will also be pushed to reflog
+
+working of GIT
+
+git nothing but a key value store, when we add file to commit the contents of the file are  hashed using SHA-1 algorithm.
+
+the hash is used as a keyname for the folders and stores the file using that key name.
+
+git has two types of commands 
+
+1. porcelain commands → these are some commands those are easy to remember like.
+    1. git add
+    2. git status
+    3. git commit
+    4. git stash, etc
+2. plumbing commands → with this we can get access to the internals of git. by using the plumbing commands we can create the hash ourselves. these are things that happens when we execute a git commands
+    1. git hash-object
+    2. git ls-files
+    3. git rev-parse
+    4. git ls-remote,
+    5. git cat-file -p hash etc
+
+with hash-object we can hash an object followed by its name, just like the git commit command that creates hash this also does the same. 
+
+git hash-object filename
+
+this will return a hash
+
+eg: bea8d7fee8e7b11c2235ca623935e6ccccd8bac3
+
+here first **two characters** of the hash are used as key. this is **name of the folder** that **store the contents of the file.**
+
+so if we try to commit the same exact hash will be created. 
+
+the folder is visible when we open the .git/objects folder, we can see the folders of the hash
+
+eg: be in our case, and inside that we can see the value of the hash is stored in there
+
+to view the contents of the file, we can use another command git cat-file -p hash → -p is to print the contents of the hash
+
+and we can just give couple of hash values, eg: in our case
+
+git cat-file -p bea8d7
+
+these are just so much identical to commit, but in commit we get little more information, 
+
+eg: if we do same to the commit’s hash, we have infos like
+
+tree, parent, author and committer
+
+author is a user and an author to that change, 
+
+committer is a user that committed the commit
+
+folders in object folder can be of three types,
+
+1. commit → is just a simple commit
+2. tree → is a folder on our file system that’s associated with a repository
+3. blob → is just a piece of data
+
+note: each commit holds reference to more trees and blobs
+
+eg: the first commit reference to the tree and tree to the blob
+
+but the next commit will reference to the tree and tree will reference the current/new blob and also the previous blob.
+
+basically commit stores a reference to a folder structure, that’s how we can go back to different commits with trees that reference to different blobs.
